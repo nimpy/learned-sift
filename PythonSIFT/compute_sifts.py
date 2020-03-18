@@ -5,6 +5,8 @@ from matplotlib import pyplot as plt
 from functools import cmp_to_key
 import pickle
 import datetime
+from scipy import ndimage
+import math
 
 from pysift import generateBaseImage, computeNumberOfOctaves, generateGaussianKernels, generateGaussianImages, \
     generateDoGImages, findScaleSpaceExtrema, removeDuplicateKeypoints, convertKeypointsToInputImageSize, generateDescriptors, \
@@ -19,9 +21,35 @@ image_border_width = 5
 contrast_threshold = 0.04
 
 
-def rotate_image(image, angle):
+def rotate_image_without_resize(image, angle):
     image_center = tuple(np.array(image.shape[1::-1]) / 2)
     rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+    result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+    return result
+
+
+def rotate_image_with_resize(image, angleInDegrees):
+    h, w = image.shape[:2]
+    img_c = (w / 2, h / 2)
+
+    rot = cv2.getRotationMatrix2D(img_c, angleInDegrees, 1)
+
+    rad = math.radians(angleInDegrees)
+    sin = math.sin(rad)
+    cos = math.cos(rad)
+    b_w = int((h * abs(sin)) + (w * abs(cos)))
+    b_h = int((h * abs(cos)) + (w * abs(sin)))
+
+    rot[0, 2] += ((b_w / 2) - img_c[0])
+    rot[1, 2] += ((b_h / 2) - img_c[1])
+
+    outImg = cv2.warpAffine(image, rot, (b_w, b_h), flags=cv2.INTER_LINEAR)
+    return outImg
+
+
+def rotate_image_around_keypoint(image, keypoint):
+    image_center = tuple(np.array(keypoint.pt, dtype=np.int32))
+    rot_mat = cv2.getRotationMatrix2D(image_center, keypoint.angle, 1.0)
     result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
     return result
 
@@ -127,16 +155,23 @@ if not use_pickled:
 
     print(keypoints, descriptors)
 
-    keypoint = keypoints[292]
-    descriptor = descriptors[292]
+    for i, keypoint in enumerate(keypoints):
+        print(i)
+        print("size", keypoint.size)
+        print("angle", keypoint.angle)
+        print(descriptors[i])
+        print()
+
+
+    keypoint_index = 538
+    keypoint = keypoints[keypoint_index]
+    descriptor = descriptors[keypoint_index]
 
     pickle_keypoint_with_descriptor(keypoint, descriptor)
 
 else:
-    keypoint, descriptor = unpickle_keypoint_with_descriptor('zimnica/pickled_keypoint_with_descriptor20200318_141401.pickle')
-
-
-print(keypoint.angle, keypoint.size)
+    keypoint, descriptor = unpickle_keypoint_with_descriptor('zimnica/pickled_keypoint_with_descriptor20200318_153041.pickle')
+    print(keypoint.angle, keypoint.size)
 
 
 
@@ -146,11 +181,58 @@ print(keypoint.angle, keypoint.size)
 # # for each keypoint:
 
 
-image_rotated = rotate_image(image, keypoint.angle)
-plt.imshow(image_rotated)
 # rotate the image around it by its angle
+
+
+# image_rotated = rotate_image_with_resize(image, keypoint.angle)
+# plt.imshow(image_rotated, cmap="gray")
+
+# TODO keep in mind that in opencv the order is reversed!!
+patch_centre_x = int(keypoint.pt[1])
+patch_centre_y = int(keypoint.pt[0])
+patch_radius = int(math.ceil(keypoint.size / 2))
+patch_diameter = patch_radius * 2
+
+print(patch_centre_x, patch_centre_y, patch_diameter)
+
+
+patch = image[patch_centre_x - patch_diameter: patch_centre_x + patch_diameter, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter]
+print(image.shape)
+print(patch_centre_x - patch_diameter)  # TODO this could go out of the border and create an error!
+print(patch_centre_x + patch_diameter)
+print(patch_centre_y - patch_diameter)
+print(patch_centre_y + patch_diameter)
+plt.imshow(patch, cmap="gray")
+plt.show()
+
+patch_rotated = rotate_image_without_resize(patch, keypoint.angle)
+plt.imshow(patch_rotated, cmap="gray")
+plt.show()
+print(patch_rotated.shape)
+
+patch_rotated_cropped = patch_rotated[patch_rotated.shape[0] // 2 - patch_radius: patch_rotated.shape[0] // 2 + patch_radius,
+                                      patch_rotated.shape[1] // 2 - patch_radius: patch_rotated.shape[1] // 2 + patch_radius]
+
+plt.imshow(patch_rotated_cropped, cmap="gray")
+plt.show()
+print(patch_rotated_cropped.shape)
+
+
 # extract and save as a patch
 # calculate its SIFT and save as file
 # make sure that if it’s calculated like that the rotation of the keypoint is 0
 
+plt.show(block=True)
+plt.interactive(False)
 
+
+print('=====================')
+
+kp1, des1 = pysift.computeKeypointsAndDescriptors(patch_rotated)
+
+for i, keypoint in enumerate(kp1):
+    print(i)
+    print("size", keypoint.size)
+    print("angle", keypoint.angle)
+    print(des1[i])
+    print()
