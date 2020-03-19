@@ -7,6 +7,7 @@ import pickle
 import datetime
 from scipy import ndimage
 import math
+import imageio
 
 from pysift import generateBaseImage, computeNumberOfOctaves, generateGaussianKernels, generateGaussianImages, \
     generateDoGImages, findScaleSpaceExtrema, removeDuplicateKeypoints, convertKeypointsToInputImageSize, generateDescriptors, \
@@ -205,17 +206,20 @@ print(patch_centre_y + patch_diameter)
 plt.imshow(patch, cmap="gray")
 plt.show()
 
-patch_rotated = rotate_image_without_resize(patch, keypoint.angle)
+patch_rotated = rotate_image_without_resize(patch, 360 - keypoint.angle)
 plt.imshow(patch_rotated, cmap="gray")
 plt.show()
 print(patch_rotated.shape)
 
-patch_rotated_cropped = patch_rotated[patch_rotated.shape[0] // 2 - patch_radius: patch_rotated.shape[0] // 2 + patch_radius,
-                                      patch_rotated.shape[1] // 2 - patch_radius: patch_rotated.shape[1] // 2 + patch_radius]
+patch_rotated_cropped = patch_rotated[patch_rotated.shape[0] // 2 - patch_radius: patch_rotated.shape[0] // 2 + patch_radius + 1,
+                                      patch_rotated.shape[1] // 2 - patch_radius: patch_rotated.shape[1] // 2 + patch_radius + 1]
 
 plt.imshow(patch_rotated_cropped, cmap="gray")
 plt.show()
 print(patch_rotated_cropped.shape)
+
+imageio.imsave('images/patch_rotated_cropped.png', patch_rotated_cropped)
+print(descriptor)
 
 
 # extract and save as a patch
@@ -228,11 +232,8 @@ plt.interactive(False)
 
 print('=====================')
 
-kp1, des1 = pysift.computeKeypointsAndDescriptors(patch_rotated)
 
-for i, keypoint in enumerate(kp1):
-    print(i)
-    print("size", keypoint.size)
-    print("angle", keypoint.angle)
-    print(des1[i])
-    print()
+
+# create a keypoint of proper size, angle, etc
+# calculate sift and compare the values
+
