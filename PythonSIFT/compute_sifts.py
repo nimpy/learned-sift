@@ -237,3 +237,6 @@ print('=====================')
 # create a keypoint of proper size, angle, etc
 # calculate sift and compare the values
 
+
+
+#compare the sift from this descriptor and the other one
