@@ -55,10 +55,10 @@ def rotate_image_around_keypoint(image, keypoint):
     return result
 
 
-def pickle_keypoint_with_descriptor(keypoint, descriptor):
+def pickle_keypoint_with_descriptor(keypoint, descriptor, keypoint_index):
     temp = (keypoint.pt, keypoint.size, keypoint.angle, keypoint.response, keypoint.octave, keypoint.class_id, descriptor)
 
-    pickle_file_path = 'zimnica/pickled_keypoint_with_descriptor' + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '.pickle'
+    pickle_file_path = 'zimnica/pickled_keypoint' + str(keypoint_index) + '_with_descriptor' + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + '.pickle'
     try:
         pickle.dump(temp, open(pickle_file_path, "wb"))
     except Exception as e:
@@ -70,6 +70,8 @@ def unpickle_keypoint_with_descriptor(pickle_file_path):
         # point, size, angle, response, keypoint.octave, keypoint.class_id, descriptor = pickle.load(open(pickle_file_path, "rb"))
         temp = pickle.load(open(pickle_file_path, "rb"))
         keypoint = cv2.KeyPoint(x=temp[0][0], y=temp[0][1], _size=temp[1], _angle=temp[2], _response=temp[3], _octave=temp[4], _class_id=temp[5])
+        print(temp[0][0], temp[0][1], temp[1], temp[2], temp[3], temp[4], temp[5])
+        print(temp[6])
         descriptor = temp[6]
         return keypoint, descriptor
 
@@ -164,15 +166,18 @@ if not use_pickled:
         print()
 
 
-    keypoint_index = 538
+    keypoint_index = 292
     keypoint = keypoints[keypoint_index]
     descriptor = descriptors[keypoint_index]
 
-    pickle_keypoint_with_descriptor(keypoint, descriptor)
+    pickle_keypoint_with_descriptor(keypoint, descriptor, keypoint_index)
 
 else:
-    keypoint, descriptor = unpickle_keypoint_with_descriptor('zimnica/pickled_keypoint_with_descriptor20200318_153041.pickle')
+    keypoint_index = 292
+    keypoint, descriptor = unpickle_keypoint_with_descriptor('zimnica/pickled_keypoint' + str(keypoint_index) + '_with_descriptor20200323_163005.pickle')
     print(keypoint.angle, keypoint.size)
+
+
 
 
 
@@ -218,7 +223,7 @@ plt.imshow(patch_rotated_cropped, cmap="gray")
 plt.show()
 print(patch_rotated_cropped.shape)
 
-imageio.imsave('images/patch_rotated_cropped.png', patch_rotated_cropped)
+imageio.imsave('images/patch' + str(keypoint_index) + '_rotated_cropped.png', patch_rotated_cropped)
 print(descriptor)
 
 
