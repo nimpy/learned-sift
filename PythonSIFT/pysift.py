@@ -178,6 +178,15 @@ def localizeExtremumViaQuadraticFit(i, j, image_index, octave_index, num_interva
             keypoint = KeyPoint()
             keypoint.pt = ((j + extremum_update[0]) * (2 ** octave_index), (i + extremum_update[1]) * (2 ** octave_index))
             keypoint.octave = octave_index + image_index * (2 ** 8) + int(round((extremum_update[2] + 0.5) * 255)) * (2 ** 16)
+
+            # octave_temp, layer_temp, scale_temp = unpackOctave(keypoint)
+            # print(scale_temp, extremum_update[2] + 0.5)
+            # # print(round((extremum_update[2] + 0.5)))
+            # assert octave_index == octave_temp, "octave_index != octave_temp"
+            # assert image_index == layer_temp, "image_index != layer_temp"
+            # # print(scale_temp)
+            # # print()
+
             keypoint.size = sigma * (2 ** ((image_index + extremum_update[2]) / float32(num_intervals))) * (2 ** (octave_index + 1))
             keypoint.response = abs(functionValueAtUpdatedExtremum)
             return keypoint, image_index

@@ -11,7 +11,7 @@ import imageio
 
 from pysift import generateBaseImage, computeNumberOfOctaves, generateGaussianKernels, generateGaussianImages, \
     generateDoGImages, findScaleSpaceExtrema, removeDuplicateKeypoints, convertKeypointsToInputImageSize, generateDescriptors, \
-    computeKeypointsWithOrientations, isPixelAnExtremum, localizeExtremumViaQuadraticFit, compareKeypoints
+    computeKeypointsWithOrientations, isPixelAnExtremum, localizeExtremumViaQuadraticFit, compareKeypoints, unpackOctave
 
 
 # default params
@@ -82,7 +82,7 @@ def unpickle_keypoint_with_descriptor(pickle_file_path):
 
 # query image
 image = cv2.imread('box.png', 0)
-use_pickled = True
+use_pickled = False
 
 # Compute SIFT keypoints and descriptors
 
@@ -147,7 +147,22 @@ if not use_pickled:
     for keypoint in keypoints:
         keypoint.pt = tuple(0.5 * np.array(keypoint.pt))
         keypoint.size *= 0.5
+
+        o1, l1, s1 = unpackOctave(keypoint)
+
         keypoint.octave = (keypoint.octave & ~255) | ((keypoint.octave - 1) & 255)
+
+        o2, l2, s2 = unpackOctave(keypoint)
+
+        # print(o1, o2) # assert o1 == o2 + 1
+        # print(l1, l2) # assert l1 == l2
+        # print(s1, s2)  # assert s1 * 2 == s2
+        # print()
+
+        assert o1 == o2 + 1, "WTF"
+        assert l1 == l2, "WTF"
+        assert s1 * 2 == s2, "WTF"
+
         converted_keypoints.append(keypoint)
     keypoints = converted_keypoints
 
@@ -156,14 +171,15 @@ if not use_pickled:
     descriptors = generateDescriptors(keypoints, gaussian_images)
 
 
-    print(keypoints, descriptors)
-
+    # print(keypoints, descriptors)
+    #
     for i, keypoint in enumerate(keypoints):
         print(i)
-        print("size", keypoint.size)
-        print("angle", keypoint.angle)
-        print(descriptors[i])
-        print()
+        # print("size", keypoint.size)
+        # print("angle", keypoint.angle)
+        # print(descriptors[i])
+        o, l, s = unpackOctave(keypoint.octave)
+        print(s)
 
 
     keypoint_index = 292
