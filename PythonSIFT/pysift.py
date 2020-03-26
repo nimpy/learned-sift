@@ -177,6 +177,8 @@ def localizeExtremumViaQuadraticFit(i, j, image_index, octave_index, num_interva
             # Contrast check passed -- construct and return OpenCV KeyPoint object
             keypoint = KeyPoint()
             keypoint.pt = ((j + extremum_update[0]) * (2 ** octave_index), (i + extremum_update[1]) * (2 ** octave_index))
+            # pack the octave_index into the least sign. byte, image_index (later called layer) into the second least sign. byte,
+            #   and extremum_update[2] (not used for SIFT descr. calc.) into the thrid lest sign. byte, preceded by domain adjustment (-0.5..0.5) --> (0..1) --> (0..255)
             keypoint.octave = octave_index + image_index * (2 ** 8) + int(round((extremum_update[2] + 0.5) * 255)) * (2 ** 16)
             keypoint.size = sigma * (2 ** ((image_index + extremum_update[2]) / float32(num_intervals))) * (2 ** (octave_index + 1))
             keypoint.response = abs(functionValueAtUpdatedExtremum)
