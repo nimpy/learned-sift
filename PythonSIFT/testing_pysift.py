@@ -12,7 +12,8 @@ from pysift import generateBaseImage, computeNumberOfOctaves, generateGaussianKe
     generateDoGImages, findScaleSpaceExtrema, removeDuplicateKeypoints, convertKeypointsToInputImageSize, generateDescriptors, \
     computeKeypointsWithOrientations, isPixelAnExtremum, localizeExtremumViaQuadraticFit, compareKeypoints, unpackOctave
 
-from testing_pysift_utils import rotate_image_without_resize, pickle_keypoint_with_descriptor, unpickle_keypoint_with_descriptor
+from testing_pysift_utils import rotate_image_without_resize, pickle_keypoint_with_descriptor, unpickle_keypoint_with_descriptor, \
+    get_gaussian_images_from_image
 
 
 # default params
@@ -23,9 +24,12 @@ image_border_width = 5
 contrast_threshold = 0.04
 
 
-# query image
+
 image = cv2.imread('box.png', 0)
+keypoint_index = 587  # 587 here is 459 for sift
 use_pickled = True
+
+
 
 # Compute SIFT keypoints and descriptors
 
@@ -35,6 +39,11 @@ num_octaves = computeNumberOfOctaves(base_image.shape)
 gaussian_kernels = generateGaussianKernels(sigma, num_intervals)
 gaussian_images = generateGaussianImages(base_image, num_octaves, gaussian_kernels)
 dog_images = generateDoGImages(gaussian_images)
+
+
+
+
+
 
 if not use_pickled:
 
@@ -103,27 +112,25 @@ if not use_pickled:
     # print(keypoints, descriptors)
     #
     for i, keypoint in enumerate(keypoints):
-        print(i)
-        # print("size", keypoint.size)
-        # print("angle", keypoint.angle)
-        # print(descriptors[i])
-        o, l, s = unpackOctave(keypoint.octave)
-        print(s)
+        print("id", i)
+        print(keypoint.pt[0], keypoint.pt[1], keypoint.size, keypoint.angle, keypoint.octave)
+        print(descriptors[i])
+        print()
 
 
-    keypoint_index = 292
     keypoint = keypoints[keypoint_index]
     descriptor = descriptors[keypoint_index]
 
     pickle_keypoint_with_descriptor(keypoint, descriptor, keypoint_index)
 
 else:
-    keypoint_index = 292
-    keypoint, descriptor = unpickle_keypoint_with_descriptor('zimnica/pickled_keypoint' + str(keypoint_index) + '_with_descriptor20200323_163005.pickle')
+
+    keypoint, descriptor = unpickle_keypoint_with_descriptor('zimnica/pickled_keypoint' + str(keypoint_index) + '_with_descriptor20200327_121004.pickle')
     print(keypoint.angle, keypoint.size)
+    print()
 
 
-
+print('=====================')
 
 
 
@@ -138,9 +145,8 @@ patch_centre_y = int(keypoint.pt[0])
 patch_diameter = int(2 * math.floor(keypoint.size / 2) + 1)  # rounding it to the nearest odd number
 patch_radius = (patch_diameter - 1) // 2
 
-print(patch_centre_x, patch_centre_y, patch_diameter)
-
-patch = image[patch_centre_x - patch_diameter: patch_centre_x + patch_diameter, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter]  # using the diameter and not the radius to get a larger patch
+# TODO check the +1 part
+patch = image[patch_centre_x - patch_diameter: patch_centre_x + patch_diameter + 1, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter + 1]  # using the diameter and not the radius to get a larger patch
 
 # just printing
 print("image shape", image.shape)
@@ -152,11 +158,16 @@ print(patch_centre_x - patch_diameter, patch_centre_x + patch_diameter)
 print(patch_centre_y - patch_diameter, patch_centre_y + patch_diameter)
 plt.imshow(patch, cmap="gray")
 plt.show()
+#
 
+keypoint = cv2.KeyPoint(patch.shape[1] // 2, patch.shape[0] // 2, _size=4.49870252609, _angle=3.31573486328, _octave=256)
+keypoints = [keypoint]
 
+patch_gaussian_images = get_gaussian_images_from_image(patch)
 
+descriptors = generateDescriptors(keypoints, patch_gaussian_images)
 
-
+print(descriptors)
 
 
 
@@ -188,7 +199,6 @@ plt.show()
 # plt.interactive(False)
 
 
-print('=====================')
 
 
 
