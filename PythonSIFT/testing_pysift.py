@@ -169,9 +169,15 @@ descriptors = generateDescriptors(keypoints, patch_gaussian_images)
 
 print(descriptors)
 
+###
 
+gaussian_images_cropped = gaussian_images.copy()
+for i in range(gaussian_images_cropped[1].shape[0]):
+    print(gaussian_images[1, i].shape)
+    gaussian_image_cropped = gaussian_images[1, i][patch_centre_x - patch_diameter: patch_centre_x + patch_diameter + 1, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter + 1]
+    gaussian_images_cropped[1, i] = gaussian_image_cropped
 
-
+descriptors = generateDescriptors(keypoints, gaussian_images_cropped)
 
 
 
