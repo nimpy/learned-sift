@@ -131,8 +131,12 @@ else:
 
 
 print('=====================')
+print('\n'*10)
 
-
+# try to understand the difference between this descriptor and ...
+descriptors = generateDescriptors([keypoint], gaussian_images)
+descr_cvsift = descriptors[0]
+print(descr_cvsift)
 
 
 
@@ -144,42 +148,41 @@ patch_centre_x = int(keypoint.pt[1])
 patch_centre_y = int(keypoint.pt[0])
 patch_diameter = int(2 * math.floor(keypoint.size / 2) + 1)  # rounding it to the nearest odd number
 patch_radius = (patch_diameter - 1) // 2
+patch_diameter *= 2  # TODO adjust this afterwards
 
 # TODO check the +1 part
 patch = image[patch_centre_x - patch_diameter: patch_centre_x + patch_diameter + 1, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter + 1]  # using the diameter and not the radius to get a larger patch
 
 # just printing
-print("image shape", image.shape)
-print("patch shape", patch.shape)
-print("patch diameter", patch_diameter)
-print("patch radius", patch_radius)
-# TODO this could go out of the border and create an error!
-print(patch_centre_x - patch_diameter, patch_centre_x + patch_diameter)
-print(patch_centre_y - patch_diameter, patch_centre_y + patch_diameter)
-plt.imshow(patch, cmap="gray")
-plt.show()
+# print("image shape", image.shape)
+# print("patch shape", patch.shape)
+# print("patch diameter", patch_diameter)
+# print("patch radius", patch_radius)
+# # TODO this could go out of the border and create an error!
+# print(patch_centre_x - patch_diameter, patch_centre_x + patch_diameter)
+# print(patch_centre_y - patch_diameter, patch_centre_y + patch_diameter)
+# plt.imshow(patch, cmap="gray")
+# plt.show()
 #
 
-keypoint = cv2.KeyPoint(patch.shape[1] // 2, patch.shape[0] // 2, _size=4.49870252609, _angle=3.31573486328, _octave=256)
-keypoints = [keypoint]
+keypoint_from_patch = cv2.KeyPoint(patch.shape[1] // 2, patch.shape[0] // 2, _size=4.49870252609, _angle=3.31573486328, _octave=256)
+keypoints_from_patch = [keypoint_from_patch]
 
-patch_gaussian_images = get_gaussian_images_from_image(patch)
-
-descriptors = generateDescriptors(keypoints, patch_gaussian_images)
-
-print(descriptors)
+# patch_gaussian_images = get_gaussian_images_from_image(patch)
+# descriptors = generateDescriptors(keypoints_from_patch, patch_gaussian_images)
+# print(descriptors)
 
 ###
 
 gaussian_images_cropped = gaussian_images.copy()
-for i in range(gaussian_images_cropped[1].shape[0]):
-    print(gaussian_images[1, i].shape)
-    gaussian_image_cropped = gaussian_images[1, i][patch_centre_x - patch_diameter: patch_centre_x + patch_diameter + 1, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter + 1]
-    gaussian_images_cropped[1, i] = gaussian_image_cropped
+gaussian_image_cropped = gaussian_images[1, 1][patch_centre_x - patch_diameter: patch_centre_x + patch_diameter + 1, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter + 1]
+gaussian_images_cropped[1, 1] = gaussian_image_cropped
+descriptors = generateDescriptors(keypoints_from_patch, gaussian_images_cropped)
+# ... and this descriptor
+descr_cropped_gauss = descriptors[0]
+print(descr_cropped_gauss)
 
-descriptors = generateDescriptors(keypoints, gaussian_images_cropped)
-
-
+print(np.corrcoef(descr_cvsift, descr_cropped_gauss))
 
 
 ######
