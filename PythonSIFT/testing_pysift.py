@@ -148,10 +148,15 @@ patch_centre_x = int(keypoint.pt[1])
 patch_centre_y = int(keypoint.pt[0])
 patch_diameter = int(2 * math.floor(keypoint.size / 2) + 1)  # rounding it to the nearest odd number
 patch_radius = (patch_diameter - 1) // 2
-patch_diameter *= 2  # TODO adjust this afterwards
+# TODO adjust this afterwards, for the moment it's because it makes a difference on half_width variable, which in turn makes a difference on end descriptor.
+#  For this particular keypoint, the global maximum is when the diameter is 3.2 times the keypoint size, because if it's bigger, the patch goes out of the image
+#  (well not really, just gets cut off)
+patch_diameter *= 3.2
+patch_diameter = int(patch_diameter)
 
 # TODO check the +1 part
 patch = image[patch_centre_x - patch_diameter: patch_centre_x + patch_diameter + 1, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter + 1]  # using the diameter and not the radius to get a larger patch
+print(patch.shape)
 
 # just printing
 # print("image shape", image.shape)

@@ -364,9 +364,11 @@ def generateDescriptors(keypoints, gaussian_images, window_width=4, num_bins=8, 
         # num_rows = 309
         # num_cols = 193
         # half_width = 24
+        temp_counter = 0
 
         for row in range(-half_width, half_width + 1):
             for col in range(-half_width, half_width + 1):
+
                 row_rot = col * sin_angle + row * cos_angle
                 col_rot = col * cos_angle - row * sin_angle
                 row_bin = (row_rot / hist_width) + 0.5 * window_width - 0.5
@@ -374,9 +376,12 @@ def generateDescriptors(keypoints, gaussian_images, window_width=4, num_bins=8, 
                 if row_bin > -1 and row_bin < window_width and col_bin > -1 and col_bin < window_width:
                     window_row = int(round(point[1] + row))
                     window_col = int(round(point[0] + col))
+                    # print(window_row > 0, window_row < num_rows - 1, window_col > 0, window_col < num_cols - 1)
                     if window_row > 0 and window_row < num_rows - 1 and window_col > 0 and window_col < num_cols - 1:
+                        temp_counter += 1
                         dx = gaussian_image[window_row, window_col + 1] - gaussian_image[window_row, window_col - 1]
                         dy = gaussian_image[window_row - 1, window_col] - gaussian_image[window_row + 1, window_col]
+                        # print(dx, dy)
                         gradient_magnitude = sqrt(dx * dx + dy * dy)
                         gradient_orientation = rad2deg(arctan2(dy, dx)) % 360
                         weight = exp(weight_multiplier * ((row_rot / hist_width) ** 2 + (col_rot / hist_width) ** 2))
@@ -384,6 +389,8 @@ def generateDescriptors(keypoints, gaussian_images, window_width=4, num_bins=8, 
                         col_bin_list.append(col_bin)
                         magnitude_list.append(weight * gradient_magnitude)
                         orientation_bin_list.append((gradient_orientation - angle) * bins_per_degree)
+
+        print(temp_counter)
 
         for row_bin, col_bin, magnitude, orientation_bin in zip(row_bin_list, col_bin_list, magnitude_list, orientation_bin_list):
             # Smoothing via trilinear interpolation
