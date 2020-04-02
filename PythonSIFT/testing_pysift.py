@@ -26,7 +26,7 @@ contrast_threshold = 0.04
 
 
 image = cv2.imread('box.png', 0)
-keypoint_index = 587  # 587 here is 459 for sift
+keypoint_index = 587  # 587 here is 459 for sift; 528 here is 584 for sift
 use_pickled = True
 
 
@@ -129,9 +129,15 @@ else:
     print(keypoint.angle, keypoint.size)
     print()
 
-
 print('=====================')
 print('\n'*10)
+
+
+
+
+
+print('=====================')
+# print('\n'*10)
 
 # try to understand the difference between this descriptor and ...
 descriptors = generateDescriptors([keypoint], gaussian_images)
@@ -170,7 +176,7 @@ print(patch.shape)
 # plt.show()
 #
 
-keypoint_from_patch = cv2.KeyPoint(patch.shape[1] // 2, patch.shape[0] // 2, _size=4.49870252609, _angle=3.31573486328, _octave=256)
+keypoint_from_patch = cv2.KeyPoint(patch.shape[1] // 2, patch.shape[0] // 2, _size=keypoint.size, _angle=keypoint.angle, _octave=keypoint.octave)
 keypoints_from_patch = [keypoint_from_patch]
 
 # patch_gaussian_images = get_gaussian_images_from_image(patch)
@@ -179,9 +185,12 @@ keypoints_from_patch = [keypoint_from_patch]
 
 ###
 
+
+octave_index, layer_index, _ = unpackOctave(keypoint)
+
 gaussian_images_cropped = gaussian_images.copy()
-gaussian_image_cropped = gaussian_images[1, 1][patch_centre_x - patch_diameter: patch_centre_x + patch_diameter + 1, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter + 1]
-gaussian_images_cropped[1, 1] = gaussian_image_cropped
+gaussian_image_cropped = gaussian_images[octave_index + 1, layer_index][patch_centre_x - patch_diameter: patch_centre_x + patch_diameter + 1, patch_centre_y - patch_diameter: patch_centre_y + patch_diameter + 1]
+gaussian_images_cropped[octave_index + 1, layer_index] = gaussian_image_cropped
 descriptors = generateDescriptors(keypoints_from_patch, gaussian_images_cropped)
 # ... and this descriptor
 descr_cropped_gauss = descriptors[0]

@@ -8,12 +8,6 @@ import cv2 as cv
 import pickle, datetime
 import math
 
-from pysift import generateBaseImage, computeNumberOfOctaves, generateGaussianKernels, generateGaussianImages, \
-    generateDoGImages, findScaleSpaceExtrema, removeDuplicateKeypoints, convertKeypointsToInputImageSize, generateDescriptors, \
-    computeKeypointsWithOrientations, isPixelAnExtremum, localizeExtremumViaQuadraticFit, compareKeypoints, unpackOctave
-
-
-
 
 def unpack_octave(keypoint):
     """Compute octave, layer, and scale from a keypoint
@@ -123,6 +117,9 @@ def unpickle_keypoint_with_descriptor(pickle_file_path):
     except Exception as e:
         print("Problem while trying to unpickle: ", str(e))
         return None
+
+
+from pysift import generateBaseImage, computeNumberOfOctaves, generateGaussianKernels, generateGaussianImages
 
 
 def get_gaussian_images_from_image(image):
