@@ -360,7 +360,7 @@ def generateDescriptors(keypoints, gaussian_images, window_width=4, num_bins=8, 
         half_width = int(round(hist_width * sqrt(2) * (window_width + 1) * 0.5))   # sqrt(2) corresponds to diagonal length of a pixel
         half_width = int(min(half_width, sqrt(num_rows ** 2 + num_cols ** 2)))     # ensure half_width lies within image
 
-        # print(octave, layer, scale, num_rows, num_cols, point, bins_per_degree, angle, weight_multiplier, hist_width, half_width)
+        print(octave, layer, scale, num_rows, num_cols, point, bins_per_degree, angle, weight_multiplier, hist_width, half_width)
         # num_rows = 309
         # num_cols = 193
         # half_width = 24
