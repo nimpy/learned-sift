@@ -119,21 +119,21 @@ def unpickle_keypoint_with_descriptor(pickle_file_path):
         return None
 
 
-from pysift import generateBaseImage, computeNumberOfOctaves, generateGaussianKernels, generateGaussianImages
-
-
-def get_gaussian_images_from_image(image):
-    # default params
-    sigma = 1.6
-    num_intervals = 3
-    assumed_blur = 0.5
-    image_border_width = 5
-    contrast_threshold = 0.04
-
-    image = image.astype('float32')
-    base_image = generateBaseImage(image, sigma, assumed_blur)
-    num_octaves = computeNumberOfOctaves(base_image.shape)
-    gaussian_kernels = generateGaussianKernels(sigma, num_intervals)
-    gaussian_images = generateGaussianImages(base_image, num_octaves, gaussian_kernels)
-    return gaussian_images
+# from pysift import generateBaseImage, computeNumberOfOctaves, generateGaussianKernels, generateGaussianImages
+#
+#
+# def get_gaussian_images_from_image(image):
+#     # default params
+#     sigma = 1.6
+#     num_intervals = 3
+#     assumed_blur = 0.5
+#     image_border_width = 5
+#     contrast_threshold = 0.04
+#
+#     image = image.astype('float32')
+#     base_image = generateBaseImage(image, sigma, assumed_blur)
+#     num_octaves = computeNumberOfOctaves(base_image.shape)
+#     gaussian_kernels = generateGaussianKernels(sigma, num_intervals)
+#     gaussian_images = generateGaussianImages(base_image, num_octaves, gaussian_kernels)
+#     return gaussian_images
 
